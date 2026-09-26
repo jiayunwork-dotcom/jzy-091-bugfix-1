@@ -24,8 +24,20 @@ export function fiberLength(geometry: CoilGeometry): number {
   return loopCircumference(radius) * turns;
 }
 
-/** 标度因数缓存：扫描逐点、标定与闭环会对同一线圈反复求 K，按线圈键复用 */
+/**
+ * 标度因数缓存：扫描逐点、标定与闭环会对同一线圈反复求 K，按线圈键复用。
+ *
+ * 键必须包含决定 K 的全部独立几何量 R、N、λ，绝不能只按
+ * （总长 L、波长 λ）建键：不同线圈完全可能 L 相同而 (R, N) 不同
+ * （例如 R=0.05 m/N=640 与 R=0.1 m/N=320 的总长都约 201.06 m），
+ * 而 K = 4π·R·L/(λc) ∝ R·N，此时两者 K 恰好相差一倍，
+ * 只按 L、λ 建键会让后算的线圈命中先算线圈的值，且结果随调用顺序翻转。
+ */
 const scaleFactorCache = new Map<string, number>();
+
+function cacheKey(geometry: CoilGeometry): string {
+  return `${geometry.radius}|${geometry.turns}|${geometry.wavelength}`;
+}
 
 /**
  * 开环标度因数
@@ -35,7 +47,7 @@ const scaleFactorCache = new Map<string, number>();
 export function scaleFactor(geometry: CoilGeometry): number {
   const { radius, wavelength } = validateGeometry(geometry);
   const L = fiberLength(geometry);
-  const key = `${L}|${wavelength}`;
+  const key = cacheKey(geometry);
   const cached = scaleFactorCache.get(key);
   if (cached !== undefined) return cached;
   const K = (4 * Math.PI * radius * L) / (wavelength * SPEED_OF_LIGHT);
