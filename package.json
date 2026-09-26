@@ -1,0 +1,23 @@
+{
+  "name": "fog-sagnac-kernel",
+  "version": "1.0.0",
+  "description": "光纤陀螺 Sagnac 干涉相位计算内核（几何 / 相位 / 标度反演 / 扫描 / 模糊判定 / HTTP 服务）",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/src/index.js",
+    "dev": "tsc -p tsconfig.json && node dist/index.js",
+    "test": "tsc -p tsconfig.json && node --test dist/test/"
+  },
+  "dependencies": {
+    "fastify": "^4.28.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.4"
+  }
+}
